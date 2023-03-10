@@ -34,6 +34,17 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddRazorPages()
     .AddMicrosoftIdentityUI();
 
+if(builder.Environment.IsDevelopment())
+{
+    builder.Services.AddRazorPages()
+        .AddRazorRuntimeCompilation()
+        .AddMicrosoftIdentityUI();
+} else
+{
+    builder.Services.AddRazorPages()
+        .AddMicrosoftIdentityUI();
+}
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
