@@ -6,8 +6,33 @@ using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 var builder = WebApplication.CreateBuilder(args);
 
+// Get variables for Graph Api
+var initialScope = builder.Configuration["MicrosoftGraph:Scopes"]?.Split(' ');
+
+// Add variables to the service
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi(initialScope)
+            .AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
+            .AddInMemoryTokenCaches();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = options.DefaultPolicy;
+});
+
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(new AuthorizeFilter(policy));
+});
+
+builder.Services.AddRazorPages()
+    .AddMicrosoftIdentityUI();
 
 var app = builder.Build();
 
@@ -31,5 +56,8 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapRazorPages();
+app.MapControllers();
 
 app.Run();
