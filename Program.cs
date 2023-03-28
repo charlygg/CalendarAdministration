@@ -1,20 +1,21 @@
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
+using CalendarAdministration.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Get variables for Graph Api
 var initialScope = builder.Configuration["MicrosoftGraph:Scopes"]?.Split(' ');
 
-// Add variables to the service
+// Add Authentication service to Microsoft Graph
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-        .EnableTokenAcquisitionToCallDownstreamApi(initialScope)
-            .AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
-            .AddInMemoryTokenCaches();
+.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+    .EnableTokenAcquisitionToCallDownstreamApi(initialScope)
+        .AddMicrosoftGraph(builder.Configuration.GetSection("MicrosoftGraph"))
+        .AddInMemoryTokenCaches();
 
 builder.Services.AddAuthorization(options =>
 {
@@ -31,8 +32,9 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
-builder.Services.AddRazorPages()
-    .AddMicrosoftIdentityUI();
+// Add app services 
+builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<ICalendarService, CalendarService>();
 
 if(builder.Environment.IsDevelopment())
 {
@@ -61,7 +63,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllerRoute(

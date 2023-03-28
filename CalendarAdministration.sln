@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33414.496
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotesAdministration", "NotesAdministration.csproj", "{1B5F0B07-D2EF-4DBB-A78B-020CED58A3DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CalendarAdministration", "CalendarAdministration.csproj", "{1B5F0B07-D2EF-4DBB-A78B-020CED58A3DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

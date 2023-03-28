@@ -1,0 +1,132 @@
+﻿@model CalendarDetailView
+
+@using Microsoft.Graph;
+@using CalendarAdministration.Models.Calendar;
+
+<div class="row">
+    <form class="form" method="post">
+        <input asp-for="Subject" type="hidden" />
+        <input asp-for="Attendees" type="hidden"/>
+        <input asp-for="MyStatusResponse" type="hidden"/>
+        <div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="col">
+            <h3 style="color: blue;">@Model.Subject</h3>
+        </div>
+        <br />
+
+        <div class="col">
+            <div class="row mb-3">
+                <label for="title" class="col-1 col-form-label">Organizer: </label>
+                <div class="col-6">
+                    <input asp-for="Subject" disabled class="form-control" value="@Model.OrganizerEmail" />
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="row mb-3">
+                <label for="title" class="col-1 col-form-label">Attendees: </label>
+                @if(@Model.Attendees != null && Model.Attendees.Count > 0)
+                {
+                    <div class="col-6">
+                        <div class="card col-12">
+                            <div class="card-body" style="background-color: #e9ecef;">
+                                <ul>
+                                    @foreach (var i in Model.Attendees)
+                                    {
+                                        var status = i.StatusResponse.ToString();
+                                        var line = $"{i.Name} | {i.Email} ({status})";     
+
+                                        <li>@line</li>
+                                     }
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                } else
+                {
+                    <div class="col-6">
+                        <p class="col-form-label">There are no attendees for this event</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="row mb-3">
+                <label for="title" class="col-1 col-form-label">Detail: </label>
+                <div class="col-6">
+                    <div class="card col-12">
+                        <div class="card-body">
+                            @Html.Raw(@Model.Content)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="row mb-3">
+                <div class="col-6">
+                @* If the current user is the organizer it does not need response *@
+                @if(!Model.AmIOrganizer)
+                {
+                    @if (!Model.MyStatusResponse.Equals(ResponseType.Accepted))
+                    {
+                        <h4>You haven't confirmed this event yet</h4>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <p class="col-form-label">Select your choice to confirm this event: </p>
+                            </div>
+                            <div class="col-4">
+                                <select asp-for="ResponseOptions" class="form-select" asp-items="Html.GetEnumSelectList<ResponseEvent>()">
+                                    <option value="">--- Select a response ---</option>
+                                </select>
+                                <span asp-validation-for="ResponseOptions" class="text-danger"></span>
+                            </div>
+                            <div class="col-2">
+                                <input type="submit" value="Send" class="btn btn-outline-primary col-auto" />
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <p class="col-form-label">(Optional) Write a response: </p>
+                            </div>
+                            <div class="col-6">
+                                <textarea class="form-control" type="text" cols="5" rows="5" asp-for="ResponseComment"></textarea>
+                            </div>
+                        </div>
+                    }
+                    else 
+                    {
+                        @if(Model.MyStatusResponse.Equals(ResponseType.Declined))
+                        {
+                            <h4>** You declined this event</h4>
+                        } 
+                        else 
+                        {
+                            <h4>** You accepted this event</h4>
+                        }
+                    }
+                }
+                else 
+                {
+                    <h4>You are the organizer of this event</h4>
+                }
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <a class="btn btn-outline-dark" asp-action="Index" asp-controller="Calendar">Back</a>
+        </div>
+    </form>
+</div>
+
+@* Validation of view model in the same page *@
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

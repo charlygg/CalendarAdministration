@@ -1,0 +1,147 @@
+﻿@model List<CalendarIndexView>
+
+@using CalendarAdministration.Models.Calendar;
+
+@{
+    ViewData["Title"] = "Dashboard Event";
+
+    var timeZoneLocal = (TimeZoneInfo) ViewData["myTimeZone"];
+    var myEventsCollection = Model.Where(m => m.OrganizerEmail.Equals(ViewData["myEmail"].ToString()));
+    var otherEventsCollection = Model.Where(m => m.OrganizerEmail != ViewData["myEmail"].ToString());
+    TimeZoneInfo targetTimeZone = TimeZoneInfo.Local;
+
+}
+
+@if(Model != null && Model.Count > 0)
+{
+    <div class="row">
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <p>Total Events</p>
+                            <i class="icon-mail">
+                                @Model.Count()
+                            </i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <p>Your created events</p>
+                            <i class="icon-mail">
+                                @myEventsCollection.Count()
+                            </i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <p>Confirmed Events</p>
+                            <i class="icon-mail">
+                                @otherEventsCollection.Where(m => m.StatusResponse == Microsoft.Graph.ResponseType.Accepted).Count()
+                            </i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-sm-6 col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="media d-flex">
+                        <div class="align-self-center">
+                            <p>Unconfirmed Events</p>
+                            <i class="icon-mail">
+                                @otherEventsCollection.Where(m => m.StatusResponse != Microsoft.Graph.ResponseType.Accepted).Count()
+                            </i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <h3>Your events created</h3>
+        <p class="small">** You are the organizer of this events, you do not need to confirm it</p>
+        @foreach (var e in myEventsCollection)
+        {
+            <div class="col-12 col-lg-6">
+                <div class="card" style="max-height: 250px; height: 250px">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <h3 style="color: blue;"><a asp-action="Detail" asp-controller="Calendar" asp-route-id="@e.Id">@e.Subject</a></h3>
+                                @{
+                                    DateTime startTime = TimeZoneInfo.ConvertTimeFromUtc(e.StartDate.Value, targetTimeZone);
+                                    DateTime endTime = TimeZoneInfo.ConvertTimeFromUtc(e.EndDate.Value, targetTimeZone);
+                                }
+                            <p class="mb-0">Start: @startTime.ToShortDateString() - @startTime.ToLongTimeString()</p>
+                            <p>Start: @endTime.ToShortDateString() - @endTime.ToLongTimeString()</p>
+                        </div>
+                        <p class="card-text">@e.bodyPreview</p>
+                    </div>
+                </div>
+                <br />
+            </div>
+        }
+    </div>
+    <hr />
+    <div class="row">
+        <h3>Other events</h3>
+        <p class="small">** Events made by other people that have invited to you</p>
+        @foreach (var e in otherEventsCollection)
+        {
+            <div class="col-12 col-lg-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title">
+                            <div class="row">
+                                <h3 style="color: blue;"><a asp-action="Detail" asp-controller="Calendar" asp-route-id="@e.Id">@e.Subject</a></h3>
+                            </div>
+                            @{
+                                DateTime startTime = TimeZoneInfo.ConvertTimeFromUtc(e.StartDate.Value, targetTimeZone);
+                                DateTime endTime = TimeZoneInfo.ConvertTimeFromUtc(e.EndDate.Value, targetTimeZone);
+                            }
+                            <p class="mb-0">Start: @startTime.ToShortDateString() - @startTime.ToLongTimeString()</p>
+                            <p>End: @endTime.ToShortDateString() - @endTime.ToLongTimeString()</p>
+                        </div>
+                        <p class="card-text">@e.bodyPreview</p>
+                        <hr>
+                        @if (e.StatusResponse == Microsoft.Graph.ResponseType.Accepted)
+                        {
+                            <div class="alert alert-primary" role="alert">
+                                You have accepted this event
+                            </div>
+                        } 
+                        else
+                        {
+                            <div class="alert alert-warning" role="alert">
+                                You need to answer this event, <a asp-action="Detail" asp-controller="Calendar" asp-route-id="@e.Id">click here</a>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <br />
+            </div>
+        }
+    </div>
+} else
+{
+    <div class="row">
+        <div class="col">
+            <h4>There are no current events in your calendar</h4>
+        </div>
+    </div>
+}

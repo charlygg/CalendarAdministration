@@ -3,9 +3,14 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Events Administration</h1>
 </div>
 
-<div>Graph API Result </div>
-<div>@ViewData["GraphApiResult"]</div>
+<div class="text-center">
+    About Me: <p>@ViewData["UserName"]</p>
+    My Email: <p>@ViewData["UserEmail"]</p>
+</div>
+
+<div class="text-center">
+    <p><a asp-action="Index" asp-controller="Calendar">Go to my Events Administration</a></p>
+</div>

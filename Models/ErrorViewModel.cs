@@ -1,4 +1,4 @@
-namespace NotesAdministration.Models
+namespace CalendarAdministration.Models
 {
     public class ErrorViewModel
     {
